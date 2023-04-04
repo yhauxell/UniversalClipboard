@@ -16,18 +16,10 @@ ipcMain.handle('getIpResolver', () => {
   };
 })
 
-let last = ''
-
-setInterval(() => {
-  const clipText = clipboard.readText();
-  if (last !== clipText) {
-    last = clipText;
-    console.log(clipText);
-  }
-}, 1100);
+let win;
 
 function createWindow() {
-  const win = new BrowserWindow({
+  win = new BrowserWindow({
     width: 800,
     height: 600,
     webPreferences: {
@@ -35,13 +27,14 @@ function createWindow() {
       backgroundThrottling: false
     }
   })
-
+  
   win.loadFile('index.html')
+  win.openDevTools();
 }
 
 app.whenReady().then(() => {
   createWindow()
-
+  
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow()
@@ -55,16 +48,26 @@ app.on('window-all-closed', () => {
   }
 })
 
+let last = '';
+
 //WS server
-const wss = new WebSocketServer({ port: 8888 });
+const wss = new WebSocketServer({ port: 4000 });
 
 wss.on('connection', function connection(ws) {
-  console.log('connected', ws);
+
   ws.on('error', console.error);
 
   ws.on('message', function message(data) {
     console.log('received: %s', data);
+    win.webContents.send('new-clip',data.toString());
   });
 
-  ws.send('something');
+  setInterval(() => {
+    const clipText = clipboard.readText();
+    if (last !== clipText) {
+      last = clipText;
+      ws.send(last);
+      win.webContents.send('new-clip',last);
+    }
+  }, 1100);
 });

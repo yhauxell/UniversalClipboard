@@ -12,5 +12,6 @@ window.addEventListener('DOMContentLoaded', () => {
   })
 
 contextBridge.exposeInMainWorld('bridge', {
-  getIpResolver: () => ipcRenderer.invoke('getIpResolver')
+  getIpResolver: () => ipcRenderer.invoke('getIpResolver'),
+  onNewClip: (callback) => ipcRenderer.on('new-clip', callback)
 })

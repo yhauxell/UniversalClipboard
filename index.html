@@ -10,6 +10,13 @@
 
 <body>
     <script>
+
+        function appendClip(content){
+            const container = document.getElementById('clipboard-list');
+            const item = document.createElement('li');
+            item.appendChild(document.createTextNode(content));
+            container.appendChild(item);
+        }
     
         function getLocalIp() {
             settings = window.bridge.getIpResolver().then(response => {
@@ -20,8 +27,14 @@
 
         getLocalIp();
 
+        window.bridge.onNewClip((_, clip)=>{
+            console.log('Received new clip: ',clip);
+            appendClip(clip);
+        })
+
     </script>
     <h1>Hello World!</h1>
+    <ul id="clipboard-list"></ul>
     <p>
         We are using Node.js <span id="node-version"></span>,
         Chromium <span id="chrome-version"></span>,
